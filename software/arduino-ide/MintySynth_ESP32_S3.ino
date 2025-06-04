@@ -1,5 +1,5 @@
 /*
- * MintySynth ESP32-S3 Expansion - PlatformIO Version
+ * MintySynth ESP32-S3 Expansion - Arduino IDE Version
  * 
  * Main firmware for ESP32-S3 based MintySynth expansion
  * 
@@ -10,18 +10,22 @@
  * - 4x4 Matrix Keyboard + 4 direct buttons
  * - PCM5102A I2S DAC
  * 
+ * Libraries Required:
+ * - TFT_eSPI by Bodmer
+ * - ESP32Encoder by madhephaestus
+ * 
+ * Install via Arduino Library Manager
+ * 
  * Based on original MintySynth by Andrew Mowry
  * http://mintysynth.com
  * 
  * License: GPL v3
  */
 
-#include <Arduino.h>
 #include <SPI.h>
 #include <TFT_eSPI.h>
 #include <ESP32Encoder.h>
 #include <driver/i2s.h>
-#include "MintySynth.h"
 
 // Display
 TFT_eSPI tft = TFT_eSPI();
@@ -58,6 +62,8 @@ struct SynthParams {
     uint8_t currentVoice = 0;
     bool stepActive[16] = {false};
     uint8_t stepNotes[16] = {60};
+    bool isPlaying = false;
+    unsigned long lastStepTime = 0;
 } synth;
 
 // Function Prototypes
@@ -69,6 +75,7 @@ void updateDisplay();
 void scanEncoders();
 void scanMatrix();
 void processAudio();
+void processSequencer();
 
 void setup() {
     Serial.begin(115200);
@@ -89,6 +96,7 @@ void setup() {
 void loop() {
     scanEncoders();
     scanMatrix();
+    processSequencer();
     processAudio();
     
     static unsigned long lastDisplayUpdate = 0;
@@ -102,16 +110,20 @@ void loop() {
 
 void initDisplay() {
     tft.init();
-    tft.setRotation(1);  // Landscape mode
+    tft.setRotation(1);  // Landscape mode (320x240)
     tft.fillScreen(TFT_BLACK);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.setTextSize(2);
     tft.drawString("MintySynth ESP32-S3", 10, 10);
     tft.setTextSize(1);
-    tft.drawString("Initializing...", 10, 40);
+    tft.drawString("Arduino IDE Version", 10, 35);
+    tft.drawString("Initializing...", 10, 50);
 }
 
 void initEncoders() {
+    // Enable the weak pull up resistors
+    ESP32Encoder::useInternalWeakPullResistors = UP;
+    
     for (int i = 0; i < 5; i++) {
         encoders[i].attachFullQuad(ENCODER_PINS[i][0], ENCODER_PINS[i][1]);
         encoders[i].clearCount();
@@ -161,41 +173,75 @@ void initAudio() {
 }
 
 void updateDisplay() {
-    // Clear display area
-    tft.fillRect(0, 50, 320, 190, TFT_BLACK);
+    // Clear parameter area
+    tft.fillRect(0, 70, 320, 170, TFT_BLACK);
     
     // Display current parameters
     tft.setTextSize(1);
-    tft.drawString("TEMPO: " + String(synth.tempo), 10, 60);
-    tft.drawString("PITCH: " + String(synth.pitch), 10, 80);
-    tft.drawString("LENGTH: " + String(synth.length), 10, 100);
-    tft.drawString("ENVELOPE: " + String(synth.envelope), 10, 120);
-    tft.drawString("SWING: " + String(synth.swing), 10, 140);
+    tft.setTextColor(TFT_CYAN, TFT_BLACK);
+    tft.drawString("TEMPO: " + String(synth.tempo) + " BPM", 10, 80);
+    tft.drawString("PITCH: " + String(synth.pitch) + " (" + noteToString(synth.pitch) + ")", 10, 95);
+    tft.drawString("LENGTH: " + String(synth.length) + "%", 10, 110);
+    tft.drawString("ENVELOPE: " + String(synth.envelope), 10, 125);
+    tft.drawString("SWING: " + String(synth.swing) + "%", 10, 140);
+    
+    // Display play status
+    tft.setTextColor(synth.isPlaying ? TFT_GREEN : TFT_RED, TFT_BLACK);
+    tft.drawString(synth.isPlaying ? "PLAYING" : "STOPPED", 170, 80);
+    
+    // Display voice and step info
+    tft.setTextColor(TFT_YELLOW, TFT_BLACK);
+    tft.drawString("Voice: " + String(synth.currentVoice + 1) + "/4", 170, 110);
+    tft.drawString("Step: " + String(synth.currentStep + 1) + "/16", 170, 125);
     
     // Display step grid
-    tft.drawString("STEPS:", 10, 170);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("STEPS:", 10, 160);
     for (int i = 0; i < 16; i++) {
-        int x = 60 + (i * 15);
-        int y = 170;
+        int x = 10 + (i * 19);
+        int y = 175;
         
+        // Color coding: Active=Green, Current=Red, Inactive=Gray
+        uint16_t color = TFT_DARKGREY;
         if (synth.stepActive[i]) {
-            tft.fillRect(x, y, 12, 12, TFT_GREEN);
-        } else {
-            tft.drawRect(x, y, 12, 12, TFT_WHITE);
+            color = TFT_GREEN;
+        }
+        if (i == synth.currentStep && synth.isPlaying) {
+            color = TFT_RED;
         }
         
-        // Highlight current step
-        if (i == synth.currentStep) {
-            tft.drawRect(x-1, y-1, 14, 14, TFT_RED);
-        }
+        tft.fillRect(x, y, 16, 16, color);
+        tft.drawRect(x, y, 16, 16, TFT_WHITE);
+        
+        // Step number
+        tft.setTextColor(TFT_BLACK, color);
+        tft.drawString(String(i + 1), x + 2, y + 4);
     }
     
-    // Display current voice and step
-    tft.drawString("Voice: " + String(synth.currentVoice + 1), 10, 200);
-    tft.drawString("Step: " + String(synth.currentStep + 1), 100, 200);
+    // Display current step note
+    tft.setTextColor(TFT_MAGENTA, TFT_BLACK);
+    tft.drawString("Current Note: " + noteToString(synth.stepNotes[synth.currentStep]), 10, 200);
+}
+
+String noteToString(uint8_t midiNote) {
+    const char* noteNames[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    int octave = (midiNote / 12) - 1;
+    int note = midiNote % 12;
+    return String(noteNames[note]) + String(octave);
 }
 
 void scanEncoders() {
+    // Check encoder switches first
+    static bool lastSwitchState[5] = {true, true, true, true, true};
+    for (int i = 0; i < 5; i++) {
+        bool currentSwitchState = digitalRead(ENCODER_PINS[i][2]);
+        if (!currentSwitchState && lastSwitchState[i]) {
+            // Encoder switch pressed
+            handleEncoderPress(i);
+        }
+        lastSwitchState[i] = currentSwitchState;
+    }
+    
     // Read encoder changes
     int32_t changes[5];
     for (int i = 0; i < 5; i++) {
@@ -219,6 +265,31 @@ void scanEncoders() {
     }
     if (changes[4] != 0) {  // Swing
         synth.swing = constrain(synth.swing + changes[4], 0, 50);
+    }
+}
+
+void handleEncoderPress(int encoder) {
+    switch (encoder) {
+        case 0:  // Tempo - Tap tempo (future feature)
+            Serial.println("Tempo encoder pressed - Tap tempo");
+            break;
+        case 1:  // Pitch - Octave jump
+            synth.pitch = ((synth.pitch / 12) + 1) * 12 + (synth.pitch % 12);
+            if (synth.pitch > 96) synth.pitch = 24 + (synth.pitch % 12);
+            synth.stepNotes[synth.currentStep] = synth.pitch;
+            break;
+        case 2:  // Length - Quantize to beat divisions
+            if (synth.length < 25) synth.length = 25;
+            else if (synth.length < 50) synth.length = 50;
+            else if (synth.length < 75) synth.length = 75;
+            else synth.length = 100;
+            break;
+        case 3:  // Envelope - Cycle through types
+            synth.envelope = (synth.envelope + 1) % 5;
+            break;
+        case 4:  // Swing - Reset to 0
+            synth.swing = 0;
+            break;
     }
 }
 
@@ -251,20 +322,29 @@ void scanMatrix() {
                 // Step button pressed
                 synth.currentStep = i;
                 synth.stepActive[i] = !synth.stepActive[i];  // Toggle step
+                Serial.println("Step " + String(i + 1) + " " + (synth.stepActive[i] ? "ON" : "OFF"));
             } else {
                 // Direct button pressed
                 switch (i - 16) {
                     case 0:  // PLAY/STOP
-                        // TODO: Implement play/stop
+                        synth.isPlaying = !synth.isPlaying;
+                        if (synth.isPlaying) {
+                            synth.lastStepTime = millis();
+                            synth.currentStep = 0;
+                        }
+                        Serial.println(synth.isPlaying ? "PLAY" : "STOP");
                         break;
                     case 1:  // VOICE SELECT
                         synth.currentVoice = (synth.currentVoice + 1) % 4;
+                        Serial.println("Voice: " + String(synth.currentVoice + 1));
                         break;
                     case 2:  // CLEAR STEP
                         synth.stepActive[synth.currentStep] = false;
+                        Serial.println("Cleared step " + String(synth.currentStep + 1));
                         break;
                     case 3:  // COPY STEP
-                        // TODO: Implement step copy
+                        // TODO: Implement step copy functionality
+                        Serial.println("Copy step (not implemented)");
                         break;
                 }
             }
@@ -273,23 +353,55 @@ void scanMatrix() {
     }
 }
 
+void processSequencer() {
+    if (!synth.isPlaying) return;
+    
+    unsigned long stepDuration = 60000 / synth.tempo / 4;  // 16th notes
+    
+    if (millis() - synth.lastStepTime >= stepDuration) {
+        // Advance to next step
+        synth.currentStep = (synth.currentStep + 1) % 16;
+        synth.lastStepTime = millis();
+        
+        // If this step is active, trigger note
+        if (synth.stepActive[synth.currentStep]) {
+            Serial.println("Trigger step " + String(synth.currentStep + 1) + 
+                         " Note: " + noteToString(synth.stepNotes[synth.currentStep]));
+        }
+    }
+}
+
 void processAudio() {
-    // TODO: Implement audio synthesis and I2S output
-    // This is a placeholder for the synthesis engine
-    static int16_t audioBuffer[64];
+    // TODO: Implement full synthesis engine from original MintySynth
+    // For now, generate simple test tone based on current step
+    
+    static int16_t audioBuffer[128];
     size_t bytesWritten;
     
-    // Generate simple test tone for now
+    // Generate audio based on active step
     static float phase = 0;
-    float frequency = 440.0 * pow(2.0, (synth.pitch - 69) / 12.0);
+    float frequency = 440.0;
     
-    for (int i = 0; i < 64; i += 2) {
-        int16_t sample = (int16_t)(sin(phase) * 8000);
-        audioBuffer[i] = sample;      // Left channel
-        audioBuffer[i + 1] = sample;  // Right channel
-        phase += 2.0 * PI * frequency / 44100.0;
-        if (phase > 2.0 * PI) phase -= 2.0 * PI;
+    if (synth.isPlaying && synth.stepActive[synth.currentStep]) {
+        frequency = 440.0 * pow(2.0, (synth.stepNotes[synth.currentStep] - 69) / 12.0);
+    } else {
+        frequency = 0;  // Silence
     }
     
-    i2s_write(I2S_NUM_0, audioBuffer, sizeof(audioBuffer), &bytesWritten, 0);
+    for (int i = 0; i < 128; i += 2) {
+        int16_t sample = 0;
+        if (frequency > 0) {
+            sample = (int16_t)(sin(phase) * 4000 * (synth.length / 100.0));
+        }
+        
+        audioBuffer[i] = sample;      // Left channel
+        audioBuffer[i + 1] = sample;  // Right channel
+        
+        if (frequency > 0) {
+            phase += 2.0 * PI * frequency / 44100.0;
+            if (phase > 2.0 * PI) phase -= 2.0 * PI;
+        }
+    }
+    
+    i2s_write(I2S_NUM_0, audioBuffer, sizeof(audioBuffer), &bytesWritten, portMAX_DELAY);
 }
