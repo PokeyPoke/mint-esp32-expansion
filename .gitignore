@@ -1,0 +1,42 @@
+# Arduino/PlatformIO
+.pio/
+.vscode/
+.clang_complete
+.gcc-flags.json
+.ccls
+compile_commands.json
+
+# Build artifacts
+*.hex
+*.bin
+*.elf
+*.map
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*~
+*.swp
+*.swo
+.tmp/
+
+# IDE files
+*.code-workspace
+.idea/
+
+# Hardware design files (temp)
+*.bak
+*.kicad_pcb-bak
+*.sch-bak
+
+# Documentation build
+docs/_build/
+*.pdf
+!docs/*.pdf
