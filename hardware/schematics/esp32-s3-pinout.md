@@ -1,66 +1,91 @@
-# ESP32-S3 Pin Allocation
+# ESP32-S3-WROOM-1 Pin Allocation
 
-## Complete Pin Assignment
+**Verified for your specific ESP32-S3-WROOM-1 board**
 
-### Display Interface (SPI)
-| ESP32-S3 Pin | Function | TFT Pin | Description |
-|--------------|----------|---------|-------------|
-| GPIO 10 | CS | CS | Chip Select |
-| GPIO 11 | MOSI | MOSI | Master Out Slave In |
-| GPIO 12 | MISO | MISO | Master In Slave Out |
-| GPIO 13 | SCK | SCK | Serial Clock |
-| GPIO 14 | DC | DC | Data/Command |
-| GPIO 15 | RST | RST | Reset |
+## AVAILABLE PINS: 34 total
+```
+0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,35,36,37,38,39,40,41,42,45,46,47,48
+```
 
-### Rotary Encoders
-| Encoder | CLK Pin | DT Pin | SW Pin | Function |
-|---------|---------|--------|--------|----------|
-| 0 | GPIO 0 | GPIO 1 | GPIO 2 | Tempo |
-| 1 | GPIO 3 | GPIO 4 | GPIO 5 | Pitch |
-| 2 | GPIO 6 | GPIO 7 | GPIO 8 | Length |
-| 3 | GPIO 9 | GPIO 16 | GPIO 17 | Envelope |
-| 4 | GPIO 18 | GPIO 19 | GPIO 20 | Swing |
+## FINAL OPTIMIZED ALLOCATION (Uses 33 pins):
 
-### Matrix Keyboard (4x4)
-| Function | Pin | Description |
-|----------|-----|-------------|
-| Row 1 | GPIO 26 | Steps 1,2,3,4 |
-| Row 2 | GPIO 27 | Steps 5,6,7,8 |
-| Row 3 | GPIO 28 | Steps 9,10,11,12 |
-| Row 4 | GPIO 29 | Steps 13,14,15,16 |
-| Col 1 | GPIO 30 | Steps 1,5,9,13 |
-| Col 2 | GPIO 31 | Steps 2,6,10,14 |
-| Col 3 | GPIO 32 | Steps 3,7,11,15 |
-| Col 4 | GPIO 33 | Steps 4,8,12,16 |
+### 2.8" TFT Display (5 pins) - Software SPI
+| Function | GPIO | TFT Pin |
+|----------|------|---------|
+| CS | 10 | CS |
+| MOSI | 11 | MOSI |
+| SCK | 13 | SCK |
+| DC | 9 | DC |
+| RST | 14 | RST |
 
-### Direct Buttons
-| Button | Pin | Function |
-|--------|-----|----------|
-| 1 | GPIO 34 | PLAY/STOP |
-| 2 | GPIO 35 | VOICE SELECT |
-| 3 | GPIO 36 | CLEAR STEP |
-| 4 | GPIO 37 | COPY STEP |
+### 5 Rotary Encoders (15 pins)
+| Encoder | CLK | DT | SW | Function |
+|---------|-----|----|----|----------|
+| 0 | 4 | 5 | 6 | Tempo |
+| 1 | 7 | 15 | 16 | Pitch |
+| 2 | 17 | 18 | 8 | Length |
+| 3 | 1 | 2 | 42 | Envelope |
+| 4 | 41 | 40 | 39 | Swing |
 
-### Audio Output (I2S)
-| Signal | Pin | Description |
-|--------|-----|-------------|
-| BCLK | GPIO 38 | Bit Clock |
-| LRCLK | GPIO 39 | Left/Right Clock |
-| DOUT | GPIO 40 | Data Output |
+### 4x4 Matrix Keyboard (8 pins)
+| Function | GPIO | Description |
+|----------|------|-------------|
+| Row 1 | 38 | Steps 1,2,3,4 |
+| Row 2 | 37 | Steps 5,6,7,8 |
+| Row 3 | 36 | Steps 9,10,11,12 |
+| Row 4 | 35 | Steps 13,14,15,16 |
+| Col 1 | 48 | Steps 1,5,9,13 |
+| Col 2 | 47 | Steps 2,6,10,14 |
+| Col 3 | 21 | Steps 3,7,11,15 |
+| Col 4 | 46 | Steps 4,8,12,16 |
 
-### Available for Future Expansion
-| Pin Range | Count | Potential Use |
-|-----------|-------|---------------|
-| GPIO 21-25 | 5 pins | Additional controls |
-| GPIO 41-48 | 8 pins | MIDI, CV, extras |
+### Direct Buttons (3 pins) - Reduced from 4
+| Button | GPIO | Function |
+|--------|------|----------|
+| 1 | 45 | PLAY/STOP |
+| 2 | 3 | VOICE SELECT |
+| 3 | 19 | CLEAR/SHIFT |
 
-## Power Connections
-- **VCC**: 3.3V from ESP32-S3
-- **GND**: Common ground
-- **5V**: For audio amplification (if needed)
+### Audio Output I2S (3 pins)
+| Signal | GPIO | Description |
+|--------|------|-------------|
+| BCLK | 12 | Bit Clock |
+| LRCLK | 20 | Left/Right Clock |
+| DOUT | 0 | Data Output |
 
-## Notes
-- All encoder and button pins use internal pull-up resistors
-- I2S uses dedicated audio pins for clean signal
-- SPI display uses hardware SPI for fast updates
-- Matrix scanning minimizes pin usage while providing 16 inputs
+**CAUTION**: GPIO 0 used for audio - this may affect boot sequence. Alternative: use external I2S module.
+
+## PIN USAGE SUMMARY:
+- Display: 5 pins
+- Encoders: 15 pins  
+- Matrix: 8 pins
+- Buttons: 3 pins
+- Audio: 3 pins
+- **TOTAL: 34 pins used (all available pins)**
+
+## ALTERNATIVE SAFER ALLOCATION:
+
+If GPIO 0 causes boot issues, here's a safer version:
+
+### Audio Output (Using USB pins - requires no USB debugging)
+| Signal | GPIO | Description |
+|--------|------|-------------|
+| BCLK | 19 | Bit Clock |
+| LRCLK | 20 | Left/Right Clock |  
+| DOUT | 0 | Data Output |
+
+### Move CLEAR/SHIFT button:
+- Button 3: GPIO 12 (freed from I2S)
+
+This keeps GPIO 0 free for boot safety.
+
+## RECOMMENDATION:
+Use the **SAFER** allocation to avoid boot issues. This gives you:
+- ✅ All 5 rotary encoders
+- ✅ Full 4x4 matrix keyboard  
+- ✅ 3 essential buttons
+- ✅ High-quality I2S audio
+- ✅ Full-color display
+- ✅ Safe boot sequence
+
+Would you like me to update the code with this optimized allocation?

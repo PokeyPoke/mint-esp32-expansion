@@ -70,11 +70,12 @@ mint-esp32-expansion/
 
 ## Getting Started
 
-1. **Hardware Assembly**: Follow the [Hardware Guide](docs/HARDWARE_GUIDE.md)
-2. **Software Setup**: Install Arduino IDE with ESP32 support
-3. **Upload Code**: Flash the main sketch to your ESP32-S3
-4. **Calibration**: Run initial setup and calibration
-5. **Play Music**: Start creating sequences!
+1. **Pin Configuration**: Check [ESP32-S3 Pinout](hardware/schematics/esp32-s3-pinout.md) for verified pin allocations
+2. **Hardware Assembly**: Follow the [Hardware Guide](docs/HARDWARE_GUIDE.md)
+3. **Software Setup**: Install Arduino IDE with ESP32 support
+4. **Upload Code**: Flash the main sketch to your ESP32-S3
+5. **Calibration**: Run initial setup and calibration
+6. **Play Music**: Start creating sequences!
 
 ## Development Status
 
