@@ -9,40 +9,40 @@ GPIO 10 (CS)      →    CS (Chip Select)
 GPIO 11 (MOSI)    →    MOSI (Data)
 GPIO 12 (MISO)    →    MISO (Data)
 GPIO 13 (SCK)     →    SCK (Clock)
-GPIO 14 (DC)      →    DC (Data/Command)
-GPIO 15 (RST)     →    RST (Reset)
+GPIO 9 (DC)       →    DC (Data/Command)
+GPIO 46 (RST)     →    RST (Reset)
 3.3V              →    VCC
 GND               →    GND
 ```
 
-### 5 Rotary Encoders - CORRECTED
+### 5 Rotary Encoders - FINAL VERSION
 ```
-Encoder 0 (Tempo):     GPIO 1,2,4   (CLK,DT,SW)
-Encoder 1 (Pitch):     GPIO 5,6,7   (CLK,DT,SW)
-Encoder 2 (Length):    GPIO 8,9,16  (CLK,DT,SW)
-Encoder 3 (Envelope):  GPIO 17,18,21 (CLK,DT,SW)
-Encoder 4 (Swing):     GPIO 47,48,38 (CLK,DT,SW)
-```
-
-### 4x4 Matrix Keyboard - CORRECTED
-```
-Matrix Rows:    GPIO 39,40,41,42 → Rows 1-4
-Matrix Columns: GPIO 26,27,28,29 → Cols 1-4
+Encoder 0 (Tempo):     GPIO 4,5,6    (CLK,DT,SW)
+Encoder 1 (Pitch):     GPIO 7,15,16  (CLK,DT,SW)
+Encoder 2 (Length):    GPIO 17,18,8  (CLK,DT,SW)
+Encoder 3 (Envelope):  GPIO 1,2,42   (CLK,DT,SW)
+Encoder 4 (Swing):     GPIO 41,40,39 (CLK,DT,SW)
 ```
 
-### Direct Buttons - CORRECTED
+### 4x4 Matrix Keyboard - FINAL VERSION
 ```
-GPIO 30 → PLAY/STOP
-GPIO 31 → VOICE SELECT
-GPIO 32 → CLEAR STEP
-GPIO 33 → COPY STEP
+Matrix Rows:    GPIO 21,47,48,14 → Rows 1-4
+Matrix Columns: GPIO 38,37,36,35 → Cols 1-4
 ```
 
-### Audio Output (I2S) - CORRECTED
+### Direct Buttons - FINAL VERSION
 ```
-GPIO 34 → I2S_BCLK (Bit Clock)
-GPIO 35 → I2S_LRCLK (Left/Right Clock)
-GPIO 36 → I2S_DOUT (Data Out)
+GPIO 34 → PLAY/STOP
+GPIO 33 → VOICE SELECT
+GPIO 45 → CLEAR STEP
+GPIO 3  → COPY STEP
+```
+
+### Audio Output (I2S) - FINAL VERSION
+```
+GPIO 43 → I2S_BCLK (Bit Clock)
+GPIO 44 → I2S_LRCLK (Left/Right Clock)
+GPIO 20 → I2S_DOUT (Data Out)
 ```
 
 ## Assembly Instructions
@@ -54,20 +54,25 @@ GPIO 36 → I2S_DOUT (Data Out)
 5. **Add I2S DAC module**
 6. **Test each section before final assembly**
 
-## IMPORTANT: Avoided Problematic Pins
+## CRITICAL: ESP32-S3 GPIO Reality Check
 
-⚠️ **These pins are NOT used to avoid conflicts:**
-- **GPIO 0**: Boot mode control (strapping pin)
-- **GPIO 3**: JTAG control (strapping pin)  
-- **GPIO 19-20**: USB data pins
-- **GPIO 43-44**: UART debug pins
-- **GPIO 45-46**: Power/ROM control pins
+⚠️ **GPIO PINS THAT DO NOT EXIST ON ESP32-S3:**
+- **GPIO 22-32**: These pin numbers DO NOT EXIST! (11 missing pins)
+- Available pins: GPIO 0-21 and GPIO 33-48 only (38 total pins)
 
-✅ **Pin allocation verified safe for:**
-- Normal boot sequence
-- USB debugging
-- PSRAM compatibility (with alternatives provided)
-- No strapping pin conflicts
+⚠️ **Problematic pins we're carefully using:**
+- **GPIO 0**: Boot strapping pin (NOT USED - avoided completely)
+- **GPIO 3**: Used as button input (safe with pull-up)
+- **GPIO 19**: USB D- (NOT USED - preserved for USB)
+- **GPIO 20**: USB D+ (used for I2S audio - OK if not using USB)
+- **GPIO 43-44**: Default UART (used for I2S - OK if not debugging)
+- **GPIO 45-46**: Strapping pins (used carefully - GPIO 45 as input, GPIO 46 as output)
+
+✅ **Pin allocation verified:**
+- All pins confirmed to exist on ESP32-S3
+- Boot sequence safe (GPIO 0 avoided)
+- USB can be used if GPIO 20 is freed (alternative I2S pin available)
+- Total pins used: 36 out of 38 available
 
 ## Power Requirements
 

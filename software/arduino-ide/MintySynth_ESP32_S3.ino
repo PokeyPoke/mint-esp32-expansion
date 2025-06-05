@@ -33,23 +33,35 @@ TFT_eSPI tft = TFT_eSPI();
 // Rotary Encoders
 ESP32Encoder encoders[5];
 
-// Pin Definitions - CORRECTED for ESP32-S3 constraints
+// Pin Definitions - FINAL verified ESP32-S3 GPIO allocation
+// Display uses GPIO 9-13, 46 (Hardware SPI2)
+const uint8_t TFT_CS = 10;
+const uint8_t TFT_DC = 9;
+const uint8_t TFT_RST = 46;
+const uint8_t TFT_MOSI = 11;
+const uint8_t TFT_MISO = 12;
+const uint8_t TFT_SCK = 13;
+
+// Rotary Encoders - 15 pins total
 const uint8_t ENCODER_PINS[5][3] = {
-    {1, 2, 4},      // Encoder 0: Tempo (CLK, DT, SW)
-    {5, 6, 7},      // Encoder 1: Pitch
-    {8, 9, 16},     // Encoder 2: Length  
-    {17, 18, 21},   // Encoder 3: Envelope
-    {47, 48, 38}    // Encoder 4: Swing
+    {4, 5, 6},       // Encoder 0: Tempo (CLK, DT, SW)
+    {7, 15, 16},     // Encoder 1: Pitch
+    {17, 18, 8},     // Encoder 2: Length  
+    {1, 2, 42},      // Encoder 3: Envelope
+    {41, 40, 39}     // Encoder 4: Swing
 };
 
-const uint8_t MATRIX_ROWS[4] = {39, 40, 41, 42};
-const uint8_t MATRIX_COLS[4] = {26, 27, 28, 29};
-const uint8_t DIRECT_BUTTONS[4] = {30, 31, 32, 33};
+// Matrix Keyboard - 8 pins total
+const uint8_t MATRIX_ROWS[4] = {21, 47, 48, 14};
+const uint8_t MATRIX_COLS[4] = {38, 37, 36, 35};
 
-// I2S Audio Pins
-const uint8_t I2S_BCLK = 34;
-const uint8_t I2S_LRCLK = 35;
-const uint8_t I2S_DOUT = 36;
+// Direct Buttons - 4 pins total
+const uint8_t DIRECT_BUTTONS[4] = {34, 33, 45, 3};
+
+// I2S Audio Pins - 3 pins total
+const uint8_t I2S_BCLK = 43;
+const uint8_t I2S_LRCLK = 44;
+const uint8_t I2S_DOUT = 20;
 
 // Synthesis Parameters
 struct SynthParams {
