@@ -33,16 +33,18 @@ TFT_eSPI tft = TFT_eSPI();
 // Rotary Encoders
 ESP32Encoder encoders[5];
 
-// Pin Definitions - FINAL verified ESP32-S3 GPIO allocation
-// Display uses GPIO 9-13, 46 (Hardware SPI2)
+// Pin Definitions - OPTIMIZED for YOUR ESP32-S3-WROOM-1 board
+// Using only pins confirmed available on your hardware
+// Available: 4,5,6,7,15,16,17,18,8,3,46,9,10,11,12,13,14,1,2,42,41,40,39,38,37,36,35,0,45,48,47,21,20,19
+
+// Display (5 pins) - Software SPI
 const uint8_t TFT_CS = 10;
 const uint8_t TFT_DC = 9;
-const uint8_t TFT_RST = 46;
+const uint8_t TFT_RST = 14;
 const uint8_t TFT_MOSI = 11;
-const uint8_t TFT_MISO = 12;
 const uint8_t TFT_SCK = 13;
 
-// Rotary Encoders - 15 pins total
+// Rotary Encoders (15 pins) - All 5 encoders preserved
 const uint8_t ENCODER_PINS[5][3] = {
     {4, 5, 6},       // Encoder 0: Tempo (CLK, DT, SW)
     {7, 15, 16},     // Encoder 1: Pitch
@@ -51,17 +53,18 @@ const uint8_t ENCODER_PINS[5][3] = {
     {41, 40, 39}     // Encoder 4: Swing
 };
 
-// Matrix Keyboard - 8 pins total
-const uint8_t MATRIX_ROWS[4] = {21, 47, 48, 14};
-const uint8_t MATRIX_COLS[4] = {38, 37, 36, 35};
+// Matrix Keyboard (8 pins) - Full 4x4 matrix preserved
+const uint8_t MATRIX_ROWS[4] = {38, 37, 36, 35};
+const uint8_t MATRIX_COLS[4] = {48, 47, 21, 46};
 
-// Direct Buttons - 4 pins total
-const uint8_t DIRECT_BUTTONS[4] = {34, 33, 45, 3};
+// Direct Buttons (3 pins) - Essential controls only
+const uint8_t DIRECT_BUTTONS[3] = {45, 3, 12};
+// Button 0: PLAY/STOP, Button 1: VOICE SELECT, Button 2: CLEAR/SHIFT
 
-// I2S Audio Pins - 3 pins total
-const uint8_t I2S_BCLK = 43;
-const uint8_t I2S_LRCLK = 44;
-const uint8_t I2S_DOUT = 20;
+// I2S Audio Pins (3 pins) - Using USB pins (no USB debugging)
+const uint8_t I2S_BCLK = 19;
+const uint8_t I2S_LRCLK = 20;
+const uint8_t I2S_DOUT = 0;  // GPIO 0 - CAUTION: may affect boot
 
 // Synthesis Parameters
 struct SynthParams {
