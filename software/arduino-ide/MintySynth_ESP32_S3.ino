@@ -33,23 +33,23 @@ TFT_eSPI tft = TFT_eSPI();
 // Rotary Encoders
 ESP32Encoder encoders[5];
 
-// Pin Definitions
+// Pin Definitions - CORRECTED for ESP32-S3 constraints
 const uint8_t ENCODER_PINS[5][3] = {
-    {0, 1, 2},      // Encoder 0: Tempo (CLK, DT, SW)
-    {3, 4, 5},      // Encoder 1: Pitch
-    {6, 7, 8},      // Encoder 2: Length  
-    {9, 16, 17},    // Encoder 3: Envelope
-    {18, 19, 20}    // Encoder 4: Swing
+    {1, 2, 4},      // Encoder 0: Tempo (CLK, DT, SW)
+    {5, 6, 7},      // Encoder 1: Pitch
+    {8, 9, 16},     // Encoder 2: Length  
+    {17, 18, 21},   // Encoder 3: Envelope
+    {47, 48, 38}    // Encoder 4: Swing
 };
 
-const uint8_t MATRIX_ROWS[4] = {26, 27, 28, 29};
-const uint8_t MATRIX_COLS[4] = {30, 31, 32, 33};
-const uint8_t DIRECT_BUTTONS[4] = {34, 35, 36, 37};
+const uint8_t MATRIX_ROWS[4] = {39, 40, 41, 42};
+const uint8_t MATRIX_COLS[4] = {26, 27, 28, 29};
+const uint8_t DIRECT_BUTTONS[4] = {30, 31, 32, 33};
 
 // I2S Audio Pins
-const uint8_t I2S_BCLK = 38;
-const uint8_t I2S_LRCLK = 39;
-const uint8_t I2S_DOUT = 40;
+const uint8_t I2S_BCLK = 34;
+const uint8_t I2S_LRCLK = 35;
+const uint8_t I2S_DOUT = 36;
 
 // Synthesis Parameters
 struct SynthParams {

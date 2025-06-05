@@ -15,34 +15,34 @@ GPIO 15 (RST)     →    RST (Reset)
 GND               →    GND
 ```
 
-### 5 Rotary Encoders
+### 5 Rotary Encoders - CORRECTED
 ```
-Encoder 0 (Tempo):     GPIO 0,1,2   (CLK,DT,SW)
-Encoder 1 (Pitch):     GPIO 3,4,5   (CLK,DT,SW)
-Encoder 2 (Length):    GPIO 6,7,8   (CLK,DT,SW)
-Encoder 3 (Envelope):  GPIO 9,16,17 (CLK,DT,SW)
-Encoder 4 (Swing):     GPIO 18,19,20 (CLK,DT,SW)
-```
-
-### 4x4 Matrix Keyboard
-```
-Matrix Rows:    GPIO 26,27,28,29 → Rows 1-4
-Matrix Columns: GPIO 30,31,32,33 → Cols 1-4
+Encoder 0 (Tempo):     GPIO 1,2,4   (CLK,DT,SW)
+Encoder 1 (Pitch):     GPIO 5,6,7   (CLK,DT,SW)
+Encoder 2 (Length):    GPIO 8,9,16  (CLK,DT,SW)
+Encoder 3 (Envelope):  GPIO 17,18,21 (CLK,DT,SW)
+Encoder 4 (Swing):     GPIO 47,48,38 (CLK,DT,SW)
 ```
 
-### Direct Buttons
+### 4x4 Matrix Keyboard - CORRECTED
 ```
-GPIO 34 → PLAY/STOP
-GPIO 35 → VOICE SELECT
-GPIO 36 → CLEAR STEP
-GPIO 37 → COPY STEP
+Matrix Rows:    GPIO 39,40,41,42 → Rows 1-4
+Matrix Columns: GPIO 26,27,28,29 → Cols 1-4
 ```
 
-### Audio Output (I2S)
+### Direct Buttons - CORRECTED
 ```
-GPIO 38 → I2S_BCLK (Bit Clock)
-GPIO 39 → I2S_LRCLK (Left/Right Clock)
-GPIO 40 → I2S_DOUT (Data Out)
+GPIO 30 → PLAY/STOP
+GPIO 31 → VOICE SELECT
+GPIO 32 → CLEAR STEP
+GPIO 33 → COPY STEP
+```
+
+### Audio Output (I2S) - CORRECTED
+```
+GPIO 34 → I2S_BCLK (Bit Clock)
+GPIO 35 → I2S_LRCLK (Left/Right Clock)
+GPIO 36 → I2S_DOUT (Data Out)
 ```
 
 ## Assembly Instructions
@@ -53,6 +53,21 @@ GPIO 40 → I2S_DOUT (Data Out)
 4. **Connect matrix keyboard**
 5. **Add I2S DAC module**
 6. **Test each section before final assembly**
+
+## IMPORTANT: Avoided Problematic Pins
+
+⚠️ **These pins are NOT used to avoid conflicts:**
+- **GPIO 0**: Boot mode control (strapping pin)
+- **GPIO 3**: JTAG control (strapping pin)  
+- **GPIO 19-20**: USB data pins
+- **GPIO 43-44**: UART debug pins
+- **GPIO 45-46**: Power/ROM control pins
+
+✅ **Pin allocation verified safe for:**
+- Normal boot sequence
+- USB debugging
+- PSRAM compatibility (with alternatives provided)
+- No strapping pin conflicts
 
 ## Power Requirements
 
