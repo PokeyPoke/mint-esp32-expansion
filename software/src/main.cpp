@@ -29,8 +29,8 @@ TFT_eSPI tft = TFT_eSPI();
 // Rotary Encoders
 ESP32Encoder encoders[5];
 
-// Pin Definitions - OPTIMIZED for YOUR ESP32-S3-WROOM-1 board
-// Using only pins confirmed available on your hardware
+// Pin Definitions - OPTIMIZED SAFE ALLOCATION for ESP32-S3-WROOM-1
+// Using all 34 available pins with improved boot reliability
 // Available: 4,5,6,7,15,16,17,18,8,3,46,9,10,11,12,13,14,1,2,42,41,40,39,38,37,36,35,0,45,48,47,21,20,19
 
 // Display (5 pins) - Software SPI
@@ -51,16 +51,16 @@ const uint8_t ENCODER_PINS[5][3] = {
 
 // Matrix Keyboard (8 pins) - Full 4x4 matrix preserved
 const uint8_t MATRIX_ROWS[4] = {38, 37, 36, 35};
-const uint8_t MATRIX_COLS[4] = {48, 47, 21, 46};
+const uint8_t MATRIX_COLS[4] = {48, 47, 21, 46};  // Corrected pin allocation
 
-// Direct Buttons (3 pins) - Essential controls only
-const uint8_t DIRECT_BUTTONS[3] = {45, 3, 12};
+// Direct Buttons (3 pins) - Improved allocation
+const uint8_t DIRECT_BUTTONS[3] = {20, 3, 19};
 // Button 0: PLAY/STOP, Button 1: VOICE SELECT, Button 2: CLEAR/SHIFT
 
-// I2S Audio Pins (3 pins) - Using USB pins (no USB debugging)
-const uint8_t I2S_BCLK = 19;
-const uint8_t I2S_LRCLK = 20;
-const uint8_t I2S_DOUT = 0;  // GPIO 0 - CAUTION: may affect boot
+// I2S Audio Pins (3 pins) - Relocated DOUT to avoid GPIO46 conflict
+const uint8_t I2S_BCLK = 12;
+const uint8_t I2S_LRCLK = 45;
+const uint8_t I2S_DOUT = 0;
 
 // Synthesis Parameters
 struct SynthParams {

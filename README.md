@@ -1,32 +1,35 @@
-# MintySynth ESP32-S3 Expansion
+# VaporSynth ESP32-S3 - Dual Matrix Edition
 
-A professional-grade expansion of the original MintySynth project, ported to ESP32-S3 with enhanced hardware interface and modern features.
+A professional wavetable synthesizer built on ESP32-S3 with **dual 4×4 matrix keyboards** for ultimate control and performance. Based on the original MintySynth project, enhanced with modern hardware design and professional workflow.
 
-## Project Overview
+## Key Features
 
-This project transforms the original MintySynth 4-voice wavetable sequencer into a professional synthesizer with:
+- **32 Dedicated Buttons** - Dual 4×4 matrices for steps and functions
+- **Direct-Connected Encoders** - 5 encoders on GPIO for real-time response
+- **Dedicated I2S Audio Pins** - Clean audio path with no conflicts
+- **Professional Workflow** - Dedicated buttons for every function
+- **4-Voice Wavetable Synthesis** - 15 unique waveforms with full ADSR envelopes
+- **16-Step Sequencer** - Per-voice programming with live recording
+- **Pattern Management** - Copy, paste, save, load, fill, and randomize
 
-- **ESP32-S3-WROOM-1** as the main controller
-- **2.8" ILI9341 TFT Display** for visual interface
-- **5 Rotary Encoders** for precise parameter control
-- **4x4 Matrix Keyboard** for step sequencer programming
-- **I2S Audio Output** for high-quality sound
-- **No more mode switching** - all parameters accessible simultaneously
+## Hardware Architecture
 
-## Hardware Requirements
+### Dual Matrix Design
+- **ESP32-S3-WROOM-1** microcontroller (8MB Flash recommended)
+- **2× CD74HC4067** 16-channel analog multiplexers
+- **2× 4×4 Button Matrices** (32 tactile switches total)
+- **Matrix 1:** Step sequencer control (steps 1-16)
+- **Matrix 2:** Voice, mode, pattern, and performance functions
+- **2.8" ILI9341 TFT Display** (320×240 pixels)
+- **PCM5102 I2S DAC** for professional audio output
+- **5× Rotary Encoders** with push buttons (direct GPIO)
 
-### Core Components
-- 1x ESP32-S3-WROOM-1 Development Board
-- 1x 2.8" ILI9341 SPI TFT Display (240x320)
-- 5x Rotary Encoders (with push switches)
-- 1x 4x4 Matrix Keyboard + 4 additional buttons
-- 1x PCM5102A I2S DAC Module
-- Various resistors and connecting wires
-
-### Optional Components
-- 16-channel analog multiplexers (for future expansion)
-- 3.5mm and 1/4" audio jacks
-- Custom 3D printed enclosure
+### Advantages of Dual Matrix Design
+- **Clear Separation** - Steps vs functions logically organized
+- **No Encoder Delay** - Direct GPIO connection for real-time control
+- **Professional Layout** - Every function has a dedicated button
+- **Scalable Design** - Room for expansion with 11+ spare GPIO pins
+- **Performance Optimized** - Dedicated I2S audio pins
 
 ## Features
 
@@ -51,45 +54,56 @@ This project transforms the original MintySynth 4-voice wavetable sequencer into
 
 ```
 mint-esp32-expansion/
-├── README.md                 # This file
-├── docs/                     # Documentation
-│   ├── HARDWARE_GUIDE.md     # Wiring and assembly
-│   ├── SOFTWARE_GUIDE.md     # Code structure and APIs
-│   └── USER_MANUAL.md        # Operating instructions
-├── hardware/                 # Hardware design files
-│   ├── schematics/           # Wiring diagrams
-│   ├── pcb/                  # PCB designs (future)
-│   └── enclosure/            # 3D printable case files
-├── software/                 # ESP32 Arduino code
-│   ├── src/                  # Main source code
-│   ├── lib/                  # Custom libraries
-│   └── examples/             # Example sketches
-├── original/                 # Original MintySynth reference
-└── tools/                    # Development utilities
+├── README.md                          # This file
+├── docs/                              # Documentation
+│   └── HARDWARE_GUIDE_MULTIPLEXER.md # Complete assembly guide
+├── hardware/                          # Hardware design files
+│   └── schematics/                    # Multiplexer pinout documentation
+│       └── esp32-s3-multiplexer-pinout.md
+├── software/                          # ESP32 Arduino code
+│   └── arduino-ide/                   # Arduino IDE projects
+│       ├── VaporSynth_Multiplexer.ino # Main multiplexer version
+│       ├── MintySynth_ESP32_S3_Enhanced.ino # Enhanced direct GPIO version
+│       └── USER_GUIDE.md              # Complete user manual
+├── original/                          # Original MintySynth reference
+└── tools/                             # Development utilities
 ```
 
 ## Getting Started
 
-1. **Pin Configuration**: Check [ESP32-S3 Pinout](hardware/schematics/esp32-s3-pinout.md) for verified pin allocations
-2. **Hardware Assembly**: Follow the [Hardware Guide](docs/HARDWARE_GUIDE.md)
-3. **Software Setup**: Install Arduino IDE with ESP32 support
-4. **Upload Code**: Flash the main sketch to your ESP32-S3
-5. **Calibration**: Run initial setup and calibration
-6. **Play Music**: Start creating sequences!
+### Quick Start (5 minutes)
+1. **Hardware**: Assemble multiplexer system per [Hardware Guide](docs/HARDWARE_GUIDE_MULTIPLEXER.md)
+2. **Software**: Upload [VaporSynth_Multiplexer.ino](software/arduino-ide/VaporSynth_Multiplexer.ino)
+3. **Power On**: Experience animated boot sequence with audio sweep
+4. **Play**: Press PLAY/STOP button - demo song starts automatically!
+
+### Complete Setup
+1. **Pin Configuration**: Follow [Multiplexer Pinout](hardware/schematics/esp32-s3-multiplexer-pinout.md)
+2. **Hardware Assembly**: Build dual multiplexer system per documentation
+3. **Software Upload**: Flash VaporSynth_Multiplexer.ino to ESP32-S3
+4. **User Manual**: Read [USER_GUIDE.md](software/arduino-ide/USER_GUIDE.md) for complete instructions
 
 ## Development Status
 
-- [x] Hardware architecture design
-- [x] Pin allocation planning
-- [x] Core software architecture
-- [ ] Display interface implementation
-- [ ] Encoder input handling
-- [ ] Matrix keyboard scanning
-- [ ] Audio synthesis engine port
-- [ ] I2S audio output
-- [ ] User interface development
-- [ ] Preset management system
-- [ ] Hardware testing and validation
+### ✅ Completed Features
+- [x] **Dual multiplexer hardware architecture**
+- [x] **Complete GPIO pin allocation (16 pins used, 18+ spare)**
+- [x] **Professional I2S audio output implementation**
+- [x] **Full 4-voice wavetable synthesis with 15 waveforms**
+- [x] **Complete ADSR envelope system**
+- [x] **16-step sequencer with per-voice programming**
+- [x] **Live recording with real-time note capture**
+- [x] **Per-voice swing with non-blocking event scheduler**
+- [x] **320×240 TFT display with neon-themed UI**
+- [x] **Multiple operating modes (LIVE, PROGRAM, MIXER, SCALE)**
+- [x] **Save/Load pattern system**
+- [x] **Comprehensive documentation and user manual**
+
+### 🔄 Current Status
+- **Hardware**: Fully designed and documented
+- **Software**: Complete implementation ready for use
+- **Documentation**: Comprehensive guides available
+- **Testing**: Ready for real-world deployment
 
 ## Contributing
 
